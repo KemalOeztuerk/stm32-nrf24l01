@@ -1,0 +1,13 @@
+../Core/Src/nRF24L01.c:11:6:set_csn_high	1
+../Core/Src/nRF24L01.c:15:6:set_csn_low	1
+../Core/Src/nRF24L01.c:19:6:set_ce_high	1
+../Core/Src/nRF24L01.c:23:6:set_ce_low	1
+../Core/Src/nRF24L01.c:27:6:nrf_write_reg	1
+../Core/Src/nRF24L01.c:36:9:nrf_read_reg	1
+../Core/Src/nRF24L01.c:46:6:nrf_write_reg_multi	1
+../Core/Src/nRF24L01.c:54:6:nrf_read_reg_multi	1
+../Core/Src/nRF24L01.c:62:6:nrf_send_cmd	1
+../Core/Src/nRF24L01.c:81:5:nrf_init_tx	1
+../Core/Src/nRF24L01.c:103:5:nrf_transmit	4
+../Core/Src/nRF24L01.c:153:5:nrf_init_rx	1
+../Core/Src/nRF24L01.c:176:5:nrf_receive	2
