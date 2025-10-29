@@ -8,6 +8,6 @@
 ../Core/Src/nRF24L01.c:54:6:nrf_read_reg_multi	1
 ../Core/Src/nRF24L01.c:62:6:nrf_send_cmd	1
 ../Core/Src/nRF24L01.c:81:5:nrf_init_tx	1
-../Core/Src/nRF24L01.c:103:5:nrf_transmit	4
-../Core/Src/nRF24L01.c:153:5:nrf_init_rx	1
-../Core/Src/nRF24L01.c:176:5:nrf_receive	2
+../Core/Src/nRF24L01.c:106:5:nrf_transmit	4
+../Core/Src/nRF24L01.c:146:5:nrf_init_rx	1
+../Core/Src/nRF24L01.c:171:5:nrf_receive	2

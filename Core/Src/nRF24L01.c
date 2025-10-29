@@ -84,17 +84,20 @@ int nrf_init_tx(nrf_t *nrf, uint8_t *tx_addr){
     HAL_Delay(100);
 
 	nrf_write_reg(nrf, NRF_REG_CONFIG, 0x00);
-	nrf_write_reg(nrf, NRF_REG_EN_AA, 0x00);
-	nrf_write_reg(nrf, NRF_REG_EN_RXADDR, 0x00); // ???
+	nrf_write_reg(nrf, NRF_REG_EN_AA, 0x01);
+	//nrf_write_reg(nrf, NRF_REG_EN_RXADDR, 0x00); // ???
 	nrf_write_reg(nrf, NRF_REG_SETUP_AW, 0b11);
-	nrf_write_reg(nrf, NRF_REG_SETUP_RETR, 0x00);
+	//nrf_write_reg(nrf, NRF_REG_SETUP_RETR, 0x00);
+	nrf_write_reg(nrf, NRF_REG_SETUP_RETR, 0x2F);
 	nrf_write_reg(nrf, NRF_REG_RF_CH, 1); // setting channel 1
 	nrf_write_reg(nrf, NRF_REG_RF_SETUP, 0x07);
 	nrf_write_reg_multi(nrf, NRF_REG_TX_ADDR, 5, tx_addr);
+	nrf_write_reg_multi(nrf, NRF_REG_RX_ADDR_P0, 5, tx_addr);
 	nrf_write_reg(nrf, NRF_REG_RX_PW_P0, 32);
 	nrf_send_cmd(nrf, NRF_CMD_FLUSH_TX);
 	nrf_send_cmd(nrf, NRF_CMD_FLUSH_RX);
-	nrf_write_reg(nrf, NRF_REG_CONFIG, 0b00000010); // POWER UP
+	nrf_write_reg(nrf, NRF_REG_CONFIG, 0b00001110); // POWER UP
+
 	HAL_Delay(10);
 	return 0;
 }
@@ -110,19 +113,9 @@ int nrf_transmit(nrf_t *nrf, uint8_t *data, uint16_t size){
 	set_csn_high(nrf);
 
 	set_ce_high(nrf);
-	HAL_Delay(1); // 1ms pulse (min is 10us, 1ms is very safe)
+	HAL_Delay(1);
 	set_ce_low(nrf);
 
-	/*uint8_t status = nrf_read_reg(nrf, NRF_REG_FIFO_STATUS);
-	if((status & (1<<4))==1){
-		cmd = NRF_CMD_FLUSH_TX;
-		nrf_send_cmd(nrf, cmd);
-		printf("message could not transmitted\n");
-		return 1;
-	}
-	*/
-
-	// 3. *** CRITICAL FIX: CHECK NRF_REG_STATUS, NOT FIFO_STATUS ***
 	    while(1) {
 	        // Read the main STATUS register (0x07)
 	        status = nrf_read_reg(nrf, NRF_REG_STATUS);
@@ -156,7 +149,9 @@ int nrf_init_rx(nrf_t *nrf, uint8_t *rx_addr){
     HAL_Delay(100);
 
 	nrf_write_reg(nrf, NRF_REG_CONFIG, 0x00);
-	nrf_write_reg(nrf, NRF_REG_EN_AA, 0x00);
+	//nrf_write_reg(nrf, NRF_REG_EN_AA, 0x00);
+	nrf_write_reg(nrf, NRF_REG_EN_AA, 0x01);
+	nrf_write_reg(nrf, NRF_REG_SETUP_RETR, 0x2F);
 	nrf_write_reg(nrf, NRF_REG_EN_RXADDR, 0x01);
 	nrf_write_reg(nrf, NRF_REG_SETUP_AW, 0b11);
 	nrf_write_reg(nrf, NRF_REG_SETUP_RETR, 0x00);
@@ -166,7 +161,7 @@ int nrf_init_rx(nrf_t *nrf, uint8_t *rx_addr){
 	nrf_write_reg(nrf,NRF_REG_RX_PW_P0,32); // set payload size 32 byte
 	nrf_send_cmd(nrf, NRF_CMD_FLUSH_TX);
 	nrf_send_cmd(nrf, NRF_CMD_FLUSH_RX);
-	nrf_write_reg(nrf, NRF_REG_CONFIG, 0b00000011); // POWER UP, SET RX MODE
+	nrf_write_reg(nrf, NRF_REG_CONFIG, 0b00001111); // POWER UP, SET RX MODE
 	HAL_Delay(10);
 	set_ce_high(nrf);
 
@@ -175,24 +170,17 @@ int nrf_init_rx(nrf_t *nrf, uint8_t *rx_addr){
 
 int nrf_receive(nrf_t *nrf, uint8_t *data) {
     uint8_t status;
-
-    // 1. Check the STATUS register
     status = nrf_read_reg(nrf, NRF_REG_STATUS);
-
-    // 2. Check if the RX_DR (Data Ready) flag is set (bit 6)
     if (status & (1 << 6)) {
 
-        // 3. Read the payload from the RX FIFO
+
         uint8_t cmd = NRF_CMD_R_RX_PAYLOAD;
         set_csn_low(nrf);
         HAL_SPI_Transmit(nrf->spi, &cmd, 1, 100);
         HAL_SPI_Receive(nrf->spi, data, 32, 100);
         set_csn_high(nrf);
-
-        // 4. Clear the RX_DR flag by writing '1' to it
         nrf_write_reg(nrf, NRF_REG_STATUS, (1 << 6));
-
-        return 1; // New data received
+        return 1;
     }
 
     return 0; // No new data

@@ -23,6 +23,8 @@
 /* USER CODE BEGIN Includes */
 #include "nRF24L01.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -127,8 +129,8 @@ int main(void)
     printf("--------------------------------\r\n");
     // --- END OF DIAGNOSTIC TEST ---
 
-    uint8_t data_to_send[32] = "hello world\n";
-    uint8_t counter = 0;
+    uint8_t data_to_send[32];
+    int counter = 0;
 
 
     //////////////////// RX CODE
@@ -157,6 +159,7 @@ int main(void)
 	      // Transmit the data
 
 	  printf("Sending packet %d...\n ", counter);
+	  snprintf((char*)data_to_send,32,"hello: %d\n",counter);
 	  int result = nrf_transmit(&nrf, data_to_send,32);
 
 	  if (result == 0) {
@@ -165,8 +168,9 @@ int main(void)
 	          // Error message is printed inside the driver
 	      }
 	  nrf_send_cmd(&nrf, NRF_CMD_FLUSH_TX);
+	  memset(data_to_send, 0, 32);
 	  counter++;
-	  HAL_Delay(1000); // Wait 1 second
+	  HAL_Delay(10); // Wait 1 second
 
 
 
